@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agenda · Pellizzari — pré-campanha</title>
+<meta name="description" content="Onde o Pelli vai estar: rodas de conversa, caminhadas e encontros da pré-campanha pelo Rio. Chega junto.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Agenda — Renato Pellizzari">
+<meta property="og:description" content="Onde o Pelli vai estar: rodas de conversa, caminhadas e encontros da pré-campanha pelo Rio. Chega junto.">
+<meta property="og:url" content="https://renatopellizzari.com.br/agenda/">
+<meta property="og:image" content="https://renatopellizzari.com.br/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/assets/styles.css">
+<script src="/assets/dc-compat.js" defer></script>
+</head>
+<body>
+<main lang="pt-BR" style="overflow-x:hidden">
+
+  <header class="site-header">
+    <div class="sh-inner">
+      <a href="/" class="sh-logo" aria-label="Página inicial Pellizzari"><img src="/assets/img/logo-principal.png" alt="Pellizzari"></a>
+      <nav class="sh-nav" aria-label="Menu principal">
+        <a href="/">Início</a>
+        <a href="/quem-e/">Quem é</a>
+        <a href="/propostas/">Propostas</a>
+        <a href="/agenda/" class="active">Agenda</a>
+        <a href="/participe/">Participe</a>
+      </nav>
+      <a href="/participe/" class="sh-cta">Quero participar</a>
+      <button type="button" class="sh-burger" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    </div>
+    <nav class="sh-mobile" aria-label="Menu móvel">
+      <a href="/">Início</a>
+      <a href="/quem-e/">Quem é</a>
+      <a href="/propostas/">Propostas</a>
+      <a href="/agenda/" class="active">Agenda</a>
+      <a href="/participe/">Participe</a>
+    </nav>
+  </header>
+
+  <section style="background:#f8e8c5;padding:64px 22px 72px;position:relative;overflow:hidden">
+    <img src="/assets/img/sunburst-amarelo.png" alt="" aria-hidden="true" style="position:absolute;right:clamp(-240px,-16vw,-130px);top:-160px;width:clamp(280px,38vw,480px);opacity:.5;pointer-events:none;transform:rotate(10deg)">
+    <div style="max-width:860px;margin:0 auto;position:relative;z-index:1">
+      <span style="font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:#c6430f">Agenda</span>
+      <h1 style="font-family:'Intro Rust',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(2rem,5.5vw,3.2rem);line-height:1.03;margin:.3rem 0 .8rem;color:#4c241a">Onde eu vou estar.</h1>
+      <p style="margin:0 0 2rem;color:#6b3626;max-width:56ch">A pré-campanha acontece na rua, na escola e na roda de conversa. Chega junto.</p>
+
+      <!-- Eventos (edite livremente) -->
+      <div id="agenda-lista" style="display:flex;flex-direction:column;gap:14px"></div>
+
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:2.2rem;justify-content:center;text-align:center">
+        <p style="margin:0;font-weight:700;color:#4c241a">Confirme presença pela comunidade:</p>
+        <a href="/participe/" style="font-family:'Intro Rust',sans-serif;font-weight:700;font-size:1.05rem;background:#ff6b2d;color:#fffdf7;border-radius:999px;padding:.8rem 1.6rem;text-decoration:none;display:inline-flex;box-shadow:4px 4px 0 #4c241a" style-hover="background:#f0561a;color:#fffdf7" style-active="transform:translate(2px,2px);box-shadow:2px 2px 0 #4c241a">Entrar na comunidade</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="sf-inner">
+      <img src="/assets/img/logo-pellizzari-creme.png" alt="Pellizzari">
+      <nav class="sf-nav" aria-label="Menu do rodapé">
+        <a href="/">Início</a>
+        <a href="/quem-e/">Quem é</a>
+        <a href="/propostas/">Propostas</a>
+        <a href="/agenda/">Agenda</a>
+        <a href="/participe/">Participe</a>
+      </nav>
+      <div class="sf-social">
+        <a href="#" aria-label="Instagram">IG</a>
+        <a href="#" aria-label="TikTok">TT</a>
+        <a href="#" aria-label="YouTube">YT</a>
+      </div>
+      <p class="sf-legal">Renato Pellizzari · pré-candidato a Deputado Estadual · RJ</p>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+  // Edite esta lista para atualizar a agenda.
+  var EVENTOS = [
+    { dia:"18", mes:"jul", titulo:"Roda de conversa: escola pública", local:"CIEP da Praça — 18h", bairro:"Tijuca" },
+    { dia:"22", mes:"jul", titulo:"Caminhada com a economia criativa", local:"Feira do Lavradio — 10h", bairro:"Centro" },
+    { dia:"26", mes:"jul", titulo:"Visita ao Planetário com professores", local:"Fundação Planetário — 14h", bairro:"Gávea" },
+    { dia:"01", mes:"ago", titulo:"Encontro da juventude", local:"Lona Cultural — 16h", bairro:"Madureira" },
+    { dia:"08", mes:"ago", titulo:"Balcão de direitos itinerante", local:"Praça do Skate — 9h", bairro:"São Gonçalo" },
+    { dia:"15", mes:"ago", titulo:"Plenária aberta da pré-campanha", local:"Clube local — 18h30", bairro:"Niterói" }
+  ];
+  var lista = document.getElementById('agenda-lista');
+  EVENTOS.forEach(function(ev){
+    var el = document.createElement('article');
+    el.setAttribute('style','background:#fffdf7;border:1px solid #e7d4a8;border-radius:22px;padding:1.1rem 1.3rem;box-shadow:0 6px 18px rgba(74,36,26,.1);display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px');
+    el.innerHTML =
+      '<div style="background:#ffe1d0;color:#c6430f;border-radius:16px;min-width:74px;padding:.5rem .6rem;display:flex;flex-direction:column;align-items:center;line-height:1.05;flex-shrink:0">'
+      + '<span style="font-family:\'Intro Rust\',sans-serif;font-weight:700;font-size:1.4rem">'+ev.dia+'</span>'
+      + '<span style="font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em">'+ev.mes+'</span></div>'
+      + '<div style="flex:1 1 220px;min-width:200px">'
+      + '<h2 style="font-family:\'Intro Rust\',sans-serif;font-weight:700;text-transform:uppercase;font-size:1.1rem;line-height:1.12;margin:0 0 .2rem;color:#4c241a">'+ev.titulo+'</h2>'
+      + '<p style="margin:0;font-size:.9rem;color:#6b3626">'+ev.local+'</p></div>'
+      + '<span style="font-weight:700;font-size:.8rem;border-radius:999px;padding:.32rem .9rem;background:#fce185;color:#4c241a;flex-shrink:0">'+ev.bairro+'</span>';
+    lista.appendChild(el);
+  });
+</script>
+</body>
+</html>
