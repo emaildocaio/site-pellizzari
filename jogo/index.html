@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caça-palavras · Pellizzari · pré-campanha</title>
+<meta name="description" content="Ache as palavras dos eixos do Pellizzari: educação, cultura, saúde, direitos e mais. Um joguinho rápido pra conhecer as propostas.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Caça-palavras · Renato Pellizzari">
+<meta property="og:description" content="Ache as palavras dos eixos do Pellizzari. Um joguinho rápido pra conhecer as propostas.">
+<meta property="og:url" content="https://renatopellizzari.com.br/jogo/">
+<meta property="og:image" content="https://renatopellizzari.com.br/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/assets/styles.css">
+<script src="/assets/dc-compat.js" defer></script>
+<style>
+  /* ===== Caça-palavras ===== */
+  .cp-wrap{max-width:1060px;margin:0 auto;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+  .cp-board-col{flex:1 1 420px;min-width:290px}
+  .cp-side{flex:1 1 260px;min-width:240px}
+
+  .cp-board{
+    display:grid;gap:2px;background:#e7d4a8;padding:6px;border-radius:16px;
+    box-shadow:5px 5px 0 #4c241a;border:2px solid #4c241a;
+    touch-action:none;-webkit-user-select:none;user-select:none;width:100%;aspect-ratio:1
+  }
+  .cp-cell{
+    display:flex;align-items:center;justify-content:center;background:#fffdf7;color:#4c241a;
+    font-family:"Intro Rust",system-ui,sans-serif;font-weight:700;border-radius:6px;cursor:pointer;
+    font-size:clamp(.7rem,2.6vw,1.15rem);line-height:1;aspect-ratio:1;transition:background .08s,color .08s,transform .08s
+  }
+  .cp-cell.sel{background:#ff6b2d;color:#fffdf7;transform:scale(1.04)}
+  .cp-cell.found{background:#fce185;color:#4c241a}
+  .cp-cell.found.sel{background:#ff6b2d;color:#fffdf7}
+
+  .cp-words{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.5rem}
+  .cp-words li{
+    display:inline-flex;align-items:center;gap:.4rem;background:#ffe1d0;color:#c6430f;font-weight:700;
+    border-radius:999px;padding:.4rem .85rem;font-size:.9rem;transition:opacity .2s
+  }
+  .cp-words li.done{background:#e7d4a8;color:#8a6a3a;text-decoration:line-through;opacity:.7}
+  .cp-words li .cp-eixo{font-weight:600;font-size:.72rem;opacity:.75}
+
+  .cp-hud{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:0 0 1rem}
+  .cp-progress{font-family:"Intro Rust",sans-serif;font-weight:700;font-size:1.25rem;color:#4c241a}
+  .cp-progress b{color:#c6430f}
+  .cp-btn{
+    font-family:"Intro Rust",sans-serif;font-weight:700;font-size:.9rem;background:#fce185;color:#4c241a;
+    border:2px solid #4c241a;border-radius:999px;padding:.5rem 1.1rem;cursor:pointer;
+    box-shadow:3px 3px 0 #4c241a;transition:transform .1s,box-shadow .1s
+  }
+  .cp-btn:hover{background:#fac730}
+  .cp-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #4c241a}
+
+  /* Vitória */
+  .cp-win{
+    display:none;margin-top:22px;background:#4c241a;color:#f8e8c5;border-radius:18px;padding:28px 24px;
+    text-align:center;box-shadow:5px 5px 0 #c6430f
+  }
+  .cp-win.show{display:block;animation:cpPop .35s ease}
+  @keyframes cpPop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+  .cp-win h3{font-family:"Intro Rust",sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(1.4rem,4.5vw,2rem);margin:.2rem 0 .5rem;color:#fac730}
+  .cp-win p{margin:0 auto 1.2rem;max-width:46ch}
+  .cp-win-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+  .cp-cta{
+    font-family:"Intro Rust",sans-serif;font-weight:700;font-size:1rem;background:#ff6b2d;color:#fffdf7;
+    border-radius:999px;padding:.75rem 1.6rem;text-decoration:none;display:inline-flex;box-shadow:4px 4px 0 #fac730;
+    transition:transform .1s,box-shadow .1s,background .12s
+  }
+  .cp-cta:hover{background:#f0561a;color:#fffdf7}
+  .cp-cta:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #fac730}
+  .cp-cta.ghost{background:transparent;color:#f8e8c5;box-shadow:inset 0 0 0 2px #f8e8c5}
+  .cp-cta.ghost:hover{background:#5a2c1f;color:#fffdf7}
+  .cp-share{background:#fac730;color:#4c241a;border:none;cursor:pointer;font-size:1rem}
+  .cp-share:hover{background:#fce185;color:#4c241a}
+  .cp-share-hint{min-height:1.1rem;margin:.9rem 0 0;font-size:.85rem;color:#fac730}
+
+  @media (prefers-reduced-motion:reduce){.cp-cell,.cp-win{transition:none;animation:none}}
+</style>
+</head>
+<body>
+<main lang="pt-BR" style="overflow-x:hidden">
+
+  <header class="site-header">
+    <div class="sh-inner">
+      <a href="/" class="sh-logo" aria-label="Página inicial Pellizzari"><img src="/assets/img/logo-principal.png" alt="Pellizzari"></a>
+      <nav class="sh-nav" aria-label="Menu principal">
+        <a href="/">Início</a>
+        <a href="/quem-e/">Quem é</a>
+        <a href="/propostas/">Propostas</a>
+        <a href="/agenda/">Agenda</a>
+        <a href="/participe/">Participe</a>
+      </nav>
+      <a href="/participe/" class="sh-cta">Quero participar</a>
+      <button type="button" class="sh-burger" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    </div>
+    <nav class="sh-mobile" aria-label="Menu móvel">
+      <a href="/">Início</a>
+      <a href="/quem-e/">Quem é</a>
+      <a href="/propostas/">Propostas</a>
+      <a href="/agenda/">Agenda</a>
+      <a href="/participe/">Participe</a>
+    </nav>
+  </header>
+
+  <!-- INTRO -->
+  <section style="background:#f8e8c5;padding:56px 22px 32px;position:relative;overflow:hidden">
+    <img src="/assets/img/sunburst-laranja.png" alt="" aria-hidden="true" style="position:absolute;left:-160px;top:-180px;width:clamp(280px,34vw,460px);opacity:.14;pointer-events:none">
+    <div style="max-width:1060px;margin:0 auto;position:relative;z-index:1">
+      <span style="font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:#c6430f">Joguinho da campanha</span>
+      <h1 style="font-family:'Intro Rust',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(2rem,5.5vw,3.2rem);line-height:1.03;margin:.3rem 0 1rem;color:#4c241a">Caça-palavras dos eixos</h1>
+      <p style="margin:0;color:#6b3626;max-width:62ch">Arraste para achar as palavras escondidas na grade. Cada uma é um eixo do nosso trabalho: educação, cultura, saúde, direitos e mais. Some tudo e descubra o Rio que a gente quer construir.</p>
+    </div>
+  </section>
+
+  <!-- JOGO -->
+  <section style="background:#fcf3dd;border-top:1px solid #e7d4a8;padding:40px 22px 64px">
+    <div class="cp-wrap">
+      <div class="cp-board-col">
+        <div class="cp-hud">
+          <span class="cp-progress"><b id="cpFound">0</b>/<span id="cpTotal">0</span> encontradas</span>
+          <button type="button" class="cp-btn" id="cpReset">↻ Novo jogo</button>
+        </div>
+        <div class="cp-board" id="cpBoard" role="grid" aria-label="Grade de caça-palavras"></div>
+      </div>
+
+      <aside class="cp-side">
+        <h2 style="font-family:'Intro Rust',sans-serif;font-weight:700;text-transform:uppercase;font-size:1.3rem;margin:0 0 .8rem;color:#4c241a">Ache estas palavras</h2>
+        <ul class="cp-words" id="cpWords"></ul>
+
+        <div class="cp-win" id="cpWin">
+          <div style="font-size:2.2rem">🎉</div>
+          <h3>Achou todas!</h3>
+          <p>Esses são os eixos que o Pellizzari defende na Assembleia. Vem construir esse Rio com a gente.</p>
+          <div class="cp-win-actions">
+            <button type="button" class="cp-cta cp-share" id="cpShare">📲 Compartilhar</button>
+            <a href="/participe/" class="cp-cta">Quero participar</a>
+            <a href="/propostas/" class="cp-cta ghost">Ver as propostas</a>
+          </div>
+          <p class="cp-share-hint" id="cpShareHint"></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="sf-inner">
+      <img src="/assets/img/logo-pellizzari-creme.png" alt="Pellizzari">
+      <nav class="sf-nav" aria-label="Menu do rodapé">
+        <a href="/">Início</a>
+        <a href="/quem-e/">Quem é</a>
+        <a href="/propostas/">Propostas</a>
+        <a href="/agenda/">Agenda</a>
+        <a href="/participe/">Participe</a>
+      </nav>
+      <div class="sf-social">
+        <a href="https://www.instagram.com/renatopellizzari/" target="_blank" rel="noopener" aria-label="Instagram">IG</a>
+        <a href="https://www.facebook.com/renato.pellizzari" target="_blank" rel="noopener" aria-label="Facebook">FB</a>
+        <a href="https://www.tiktok.com/@repellizzari" target="_blank" rel="noopener" aria-label="TikTok">TT</a>
+        <a href="https://x.com/repellizzari" target="_blank" rel="noopener" aria-label="X">X</a>
+      </div>
+      <p class="sf-legal">Renato Pellizzari · pré-candidato a Deputado Estadual · RJ</p>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+(function () {
+  // ---- Palavras dos eixos (sem espaços/acentos p/ a grade) ----
+  var WORDS = [
+    { w: "EDUCACAO",  eixo: "Educação" },
+    { w: "CULTURA",   eixo: "Cultura" },
+    { w: "PROFESSOR", eixo: "Educação" },
+    { w: "SAUDE",     eixo: "Saúde" },
+    { w: "ESPORTE",   eixo: "Esporte" },
+    { w: "JUVENTUDE", eixo: "Oportunidades" },
+    { w: "EMPREGO",   eixo: "Trabalho" },
+    { w: "DIREITOS",  eixo: "Comunidade" },
+    { w: "TRANSPORTE",eixo: "Mobilidade" },
+    { w: "AMBIENTE",  eixo: "Sustentabilidade" },
+    { w: "PELLIZZARI",eixo: "O nosso nome" }
+  ];
+
+  var SIZE = 12;                       // grade 12x12
+  var ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  var DIRS = [                         // 8 direções
+    [1,0],[0,1],[1,1],[1,-1],[-1,0],[0,-1],[-1,-1],[-1,1]
+  ];
+
+  var boardEl = document.getElementById("cpBoard");
+  var wordsEl = document.getElementById("cpWords");
+  var foundEl = document.getElementById("cpFound");
+  var totalEl = document.getElementById("cpTotal");
+  var winEl   = document.getElementById("cpWin");
+  var resetEl = document.getElementById("cpReset");
+
+  var grid, placedWords, cellEls, foundSet, selecting, startCell, curPath;
+
+  function randInt(n){ return Math.floor(Math.random() * n); }
+
+  function tryPlace(word) {
+    // Até 120 tentativas de encaixar cada palavra
+    for (var t = 0; t < 120; t++) {
+      var dir = DIRS[randInt(DIRS.length)];
+      var dx = dir[0], dy = dir[1];
+      var len = word.length;
+      var maxR = SIZE, maxC = SIZE;
+      var r0 = randInt(maxR), c0 = randInt(maxC);
+      var rEnd = r0 + dy * (len - 1), cEnd = c0 + dx * (len - 1);
+      if (rEnd < 0 || rEnd >= SIZE || cEnd < 0 || cEnd >= SIZE) continue;
+      var ok = true, cells = [];
+      for (var i = 0; i < len; i++) {
+        var r = r0 + dy * i, c = c0 + dx * i;
+        var existing = grid[r][c];
+        if (existing && existing !== word[i]) { ok = false; break; }
+        cells.push([r, c]);
+      }
+      if (!ok) continue;
+      for (var j = 0; j < len; j++) grid[cells[j][0]][cells[j][1]] = word[j];
+      return cells;
+    }
+    return null;
+  }
+
+  function attempt() {
+    grid = [];
+    for (var r = 0; r < SIZE; r++) { grid.push(new Array(SIZE).fill(null)); }
+
+    // Coloca as maiores primeiro (encaixe mais fácil)
+    var sorted = WORDS.slice().sort(function(a,b){ return b.w.length - a.w.length; });
+    placedWords = [];
+    for (var i = 0; i < sorted.length; i++) {
+      var cells = tryPlace(sorted[i].w);
+      if (cells) placedWords.push({ w: sorted[i].w, eixo: sorted[i].eixo, cells: cells });
+    }
+    return placedWords.length === WORDS.length;
+  }
+
+  function build() {
+    // Regenera a grade inteira até encaixar TODAS as palavras (evita jogo com 9/10)
+    for (var tries = 0; tries < 40; tries++) { if (attempt()) break; }
+
+    // Preenche o resto com letras aleatórias
+    for (var rr = 0; rr < SIZE; rr++)
+      for (var cc = 0; cc < SIZE; cc++)
+        if (!grid[rr][cc]) grid[rr][cc] = ALPHABET[randInt(26)];
+
+    render();
+  }
+
+  function render() {
+    boardEl.style.gridTemplateColumns = "repeat(" + SIZE + ", 1fr)";
+    boardEl.innerHTML = "";
+    cellEls = [];
+    for (var r = 0; r < SIZE; r++) {
+      cellEls.push([]);
+      for (var c = 0; c < SIZE; c++) {
+        var d = document.createElement("div");
+        d.className = "cp-cell";
+        d.textContent = grid[r][c];
+        d.setAttribute("data-r", r);
+        d.setAttribute("data-c", c);
+        d.setAttribute("role", "gridcell");
+        boardEl.appendChild(d);
+        cellEls[r].push(d);
+      }
+    }
+
+    // Lista de palavras
+    wordsEl.innerHTML = "";
+    for (var i = 0; i < placedWords.length; i++) {
+      var li = document.createElement("li");
+      li.setAttribute("data-w", placedWords[i].w);
+      li.innerHTML = placedWords[i].w + ' <span class="cp-eixo">' + placedWords[i].eixo + "</span>";
+      wordsEl.appendChild(li);
+    }
+
+    foundSet = {};
+    foundEl.textContent = "0";
+    totalEl.textContent = String(placedWords.length);
+    winEl.classList.remove("show");
+    selecting = false; startCell = null; curPath = [];
+  }
+
+  // ---- Seleção por arraste (mouse + toque) ----
+  function cellFromPoint(x, y) {
+    var el = document.elementFromPoint(x, y);
+    if (el && el.classList.contains("cp-cell")) return el;
+    return null;
+  }
+
+  function lineBetween(a, b) {
+    // Retorna as células em linha reta de a até b, ou null se não for reta
+    var r0 = +a.getAttribute("data-r"), c0 = +a.getAttribute("data-c");
+    var r1 = +b.getAttribute("data-r"), c1 = +b.getAttribute("data-c");
+    var dr = r1 - r0, dc = c1 - c0;
+    var stepR = dr === 0 ? 0 : dr / Math.abs(dr);
+    var stepC = dc === 0 ? 0 : dc / Math.abs(dc);
+    var straight = (dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc));
+    if (!straight) return null;
+    var len = Math.max(Math.abs(dr), Math.abs(dc)) + 1;
+    var path = [];
+    for (var i = 0; i < len; i++) path.push(cellEls[r0 + stepR * i][c0 + stepC * i]);
+    return path;
+  }
+
+  function clearSel() {
+    for (var r = 0; r < SIZE; r++)
+      for (var c = 0; c < SIZE; c++)
+        cellEls[r][c].classList.remove("sel");
+  }
+
+  function paintSel(path) {
+    clearSel();
+    for (var i = 0; i < path.length; i++) path[i].classList.add("sel");
+  }
+
+  function wordFromPath(path) {
+    var s = "";
+    for (var i = 0; i < path.length; i++) s += path[i].textContent;
+    return s;
+  }
+
+  function markFound(entry, path) {
+    foundSet[entry.w] = true;
+    for (var i = 0; i < path.length; i++) path[i].classList.add("found");
+    var li = wordsEl.querySelector('[data-w="' + entry.w + '"]');
+    if (li) li.classList.add("done");
+    foundEl.textContent = String(Object.keys(foundSet).length);
+    if (Object.keys(foundSet).length === placedWords.length) {
+      winEl.classList.add("show");
+    }
+  }
+
+  function commitSel() {
+    if (!curPath || curPath.length < 2) { clearSel(); return; }
+    var s = wordFromPath(curPath);
+    var rev = s.split("").reverse().join("");
+    for (var i = 0; i < placedWords.length; i++) {
+      var pw = placedWords[i];
+      if (foundSet[pw.w]) continue;
+      if (s === pw.w || rev === pw.w) { markFound(pw, curPath); break; }
+    }
+    clearSel();
+    curPath = [];
+  }
+
+  function onDown(x, y) {
+    var cell = cellFromPoint(x, y);
+    if (!cell) return;
+    selecting = true; startCell = cell;
+    curPath = [cell];
+    paintSel(curPath);
+  }
+  function onMove(x, y) {
+    if (!selecting) return;
+    var cell = cellFromPoint(x, y);
+    if (!cell || !startCell) return;
+    var path = lineBetween(startCell, cell);
+    if (path) { curPath = path; paintSel(path); }
+  }
+  function onUp(x, y) {
+    if (!selecting) return;
+    selecting = false;
+    // Recalcula o caminho pela posição de soltura: início + soltura já bastam,
+    // mesmo em arraste rápido com poucos eventos de movimento.
+    if (startCell && typeof x === "number") {
+      var cell = cellFromPoint(x, y);
+      if (cell) {
+        var path = lineBetween(startCell, cell);
+        if (path) { curPath = path; }
+      }
+    }
+    commitSel();
+    startCell = null;
+  }
+
+  // Mouse
+  boardEl.addEventListener("mousedown", function(e){ e.preventDefault(); onDown(e.clientX, e.clientY); });
+  document.addEventListener("mousemove", function(e){ if (selecting) onMove(e.clientX, e.clientY); });
+  document.addEventListener("mouseup", function(e){ onUp(e.clientX, e.clientY); });
+  // Toque
+  boardEl.addEventListener("touchstart", function(e){ var t=e.touches[0]; onDown(t.clientX, t.clientY); e.preventDefault(); }, {passive:false});
+  boardEl.addEventListener("touchmove", function(e){ var t=e.touches[0]; onMove(t.clientX, t.clientY); e.preventDefault(); }, {passive:false});
+  boardEl.addEventListener("touchend", function(e){ var t=e.changedTouches[0]; onUp(t.clientX, t.clientY); });
+
+  resetEl.addEventListener("click", build);
+
+  // ---- Compartilhar: gera um card (story 1080x1920) e aciona o share nativo ----
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawCard() {
+    var W = 1080, H = 1920;
+    var canvas = document.createElement("canvas");
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext("2d");
+    var display = '"Intro Rust", system-ui, sans-serif';
+    var body = '"Aileron", system-ui, sans-serif';
+
+    // Fundo creme
+    ctx.fillStyle = "#f8e8c5"; ctx.fillRect(0, 0, W, H);
+    // Moldura marrom estilo "sticker"
+    ctx.fillStyle = "#4c241a"; roundRect(ctx, 56, 56, W - 112, H - 112, 48); ctx.fill();
+    ctx.fillStyle = "#fcf3dd"; roundRect(ctx, 84, 84, W - 168, H - 168, 34); ctx.fill();
+
+    ctx.textAlign = "center";
+
+    // Selo topo
+    ctx.fillStyle = "#c6430f";
+    ctx.font = "800 34px " + body;
+    ctx.fillText("PRÉ-CAMPANHA", W / 2, 250);
+
+    // Emoji
+    ctx.font = "150px " + body;
+    ctx.fillText("🎉", W / 2, 470);
+
+    // Título
+    ctx.fillStyle = "#c6430f";
+    ctx.font = "700 120px " + display;
+    ctx.fillText("ACHEI TODAS!", W / 2, 620);
+
+    ctx.fillStyle = "#6b3626";
+    ctx.font = "600 46px " + body;
+    ctx.fillText("no caça-palavras dos eixos", W / 2, 700);
+
+    // Emblema central: nome dentro de um selo laranja
+    ctx.fillStyle = "#ff6b2d";
+    roundRect(ctx, W / 2 - 380, 900, 760, 300, 40); ctx.fill();
+    ctx.fillStyle = "#fffdf7";
+    ctx.font = "700 82px " + display;
+    ctx.fillText("RENATO", W / 2, 1010);
+    ctx.fillText("PELLIZZARI", W / 2, 1110);
+    ctx.font = "600 40px " + body;
+    ctx.fillText("pré-candidato a Deputado Estadual · RJ", W / 2, 1170);
+
+    // Eixos
+    ctx.fillStyle = "#4c241a";
+    ctx.font = "700 48px " + display;
+    ctx.fillText("EDUCAÇÃO · CULTURA · SAÚDE", W / 2, 1400);
+    ctx.fillText("JUVENTUDE · DIREITOS · AMBIENTE", W / 2, 1470);
+
+    // Chamada + URL
+    ctx.fillStyle = "#c6430f";
+    ctx.font = "700 52px " + display;
+    ctx.fillText("Joga você também:", W / 2, 1660);
+    ctx.fillStyle = "#4c241a";
+    ctx.font = "700 56px " + body;
+    ctx.fillText("renatopellizzari.com.br/jogo", W / 2, 1740);
+
+    return canvas;
+  }
+
+  var shareBtn = document.getElementById("cpShare");
+  var shareHint = document.getElementById("cpShareHint");
+
+  function toBlob(canvas) {
+    return new Promise(function (res) { canvas.toBlob(res, "image/png"); });
+  }
+
+  shareBtn.addEventListener("click", function () {
+    shareHint.textContent = "Gerando imagem...";
+    // Garante que as fontes da marca estão carregadas antes de desenhar
+    var ready = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    ready.then(function () {
+      var canvas = drawCard();
+      return toBlob(canvas);
+    }).then(function (blob) {
+      if (!blob) { shareHint.textContent = "Não consegui gerar a imagem neste navegador."; return; }
+      var file = new File([blob], "caca-palavras-pellizzari.png", { type: "image/png" });
+      var texto = "Achei todas as palavras dos eixos do Pellizzari! Joga você também: renatopellizzari.com.br/jogo";
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: "Caça-palavras Pellizzari", text: texto })
+          .then(function () { shareHint.textContent = ""; })
+          .catch(function () { shareHint.textContent = ""; });
+      } else {
+        // Desktop / sem Web Share: baixa a imagem pronta pro story
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url; a.download = "caca-palavras-pellizzari.png";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        shareHint.textContent = "Imagem baixada! É só postar no seu story do Instagram.";
+      }
+    });
+  });
+
+  build();
+})();
+</script>
+</body>
+</html>
