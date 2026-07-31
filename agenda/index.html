@@ -83,9 +83,31 @@
 
 <script>
   // Edite esta lista para atualizar a agenda.
-  var EVENTOS = []; // sem eventos marcados no momento (adicione objetos aqui para publicar)
+  // "data" no formato AAAA-MM-DD controla o sumiço automático: o card
+  // aparece enquanto a data for hoje ou futura; passou o dia, ele some sozinho.
+  // Campos opcionais: horario, local, bairro, descricao (deixe "" para ocultar).
+  var EVENTOS = [
+    { data:"2026-07-31", dia:"31", mes:"jul", diaSemana:"Sexta", titulo:"Casa Mãe Divino Belo Amor", horario:"10h às 12h", local:"R. Conselheiro Ferraz, 10 (Lins de Vasconcelos)", bairro:"Lins de Vasconcelos", descricao:"Visita institucional. Bate-papo focado na inclusão e no impacto da Navezinha Lins, destacando como a tecnologia integrada à instituição tem gerado avanços para os alunos." },
+    { data:"2026-08-04", dia:"04", mes:"ago", diaSemana:"Terça", titulo:"Aulão de História na Maranatha", horario:"14h30", local:"Rua Ernestina, 57 fundos (Lins de Vasconcelos)", bairro:"Lins de Vasconcelos", descricao:"Brasil República: uma viagem pela nossa história. Público: 50 rapazes em processo de reabilitação/dependência química." },
+    { data:"2026-08-05", dia:"05", mes:"ago", diaSemana:"Quarta", titulo:"Podcast Errejota", horario:"14h às 16h", local:"Local a confirmar", bairro:"", descricao:"" },
+    { data:"2026-08-06", dia:"06", mes:"ago", diaSemana:"Quinta", titulo:"Gravação de vídeo com Heloísa Helena", horario:"09h", local:"Local a confirmar", bairro:"", descricao:"" },
+    { data:"2026-08-06", dia:"06", mes:"ago", diaSemana:"Quinta", titulo:"Comício doméstico com Freixo", horario:"19h", local:"Santa Amélia, 50 (Praça da Bandeira)", bairro:"Praça da Bandeira", descricao:"" },
+    { data:"2026-08-08", dia:"08", mes:"ago", diaSemana:"Sábado", titulo:"Cineclube Silvio Tendler", horario:"16h", local:"ASA, Rua São Clemente, 155, prédio 2, 1º andar (Botafogo). Estacionamento no local.", bairro:"Botafogo", descricao:"Exibição do filme Tancredo, a Travessia, de Silvio Tendler, seguida de debate." },
+    { data:"2026-08-12", dia:"12", mes:"ago", diaSemana:"Quarta", titulo:"Aniversário de 2 anos da Navezinha do Lins", horario:"12h30", local:"Navezinha, Rua Lins de Vasconcelos, 241 A (Lins)", bairro:"Lins de Vasconcelos", descricao:"Almoço com feijoada reunindo parceiros estratégicos do território. Presença de representantes das escolas da região, assistentes sociais e presidentes das associações de moradores do Complexo do Lins. Apresentação do jovem Kennedy, de aluno da trilha de aprendizagem a integrante da equipe interna e jogador profissional do time de e-sports (Arcanjo) na Nave do Conhecimento do Engenhão." },
+    { data:"2026-08-14", dia:"14", mes:"ago", diaSemana:"Sexta", titulo:"Café da manhã e bate-papo (com Tati Roque)", horario:"09h30", local:"Casa Mãe Divino Belo Amor (Rua Conselheiro Ferraz, nº 10, Lins de Vasconcelos)", bairro:"Lins de Vasconcelos", descricao:"Café da manhã e bate-papo sobre Educação e Tecnologia (com Tati Roque)." },
+    { data:"2026-08-15", dia:"15", mes:"ago", diaSemana:"Sábado", titulo:"Seu Largato Mama", horario:"A partir das 15h", local:"Patota Bar, Boulevard 28 de Setembro, 20 (Vila Isabel)", bairro:"Vila Isabel", descricao:"" }
+  ];
+
   var lista = document.getElementById('agenda-lista');
-  if (EVENTOS.length === 0) {
+
+  // Só eventos de hoje em diante, ordenados por data (passou o dia, some).
+  var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  function parseData(s){ var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  var visiveis = EVENTOS
+    .filter(function(ev){ return parseData(ev.data) >= hoje; })
+    .sort(function(a, b){ return parseData(a.data) - parseData(b.data); });
+
+  if (visiveis.length === 0) {
     var vazio = document.createElement('div');
     vazio.setAttribute('style','background:#fffdf7;border:1px dashed #d8c08a;border-radius:22px;padding:1.8rem 1.4rem;text-align:center');
     vazio.innerHTML =
@@ -93,17 +115,22 @@
       + '<p style="margin:.5rem auto 0;font-size:.95rem;color:#6b3626;max-width:44ch">Os próximos encontros da pré-campanha aparecem aqui. Entra na comunidade pra saber em primeira mão.</p>';
     lista.appendChild(vazio);
   }
-  EVENTOS.forEach(function(ev){
+
+  visiveis.forEach(function(ev){
+    var meta = ev.diaSemana + (ev.horario ? ' · ' + ev.horario : '');
     var el = document.createElement('article');
-    el.setAttribute('style','background:#fffdf7;border:1px solid #e7d4a8;border-radius:22px;padding:1.1rem 1.3rem;box-shadow:0 6px 18px rgba(74,36,26,.1);display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px');
+    el.setAttribute('style','background:#fffdf7;border:1px solid #e7d4a8;border-radius:22px;padding:1.1rem 1.3rem;box-shadow:0 6px 18px rgba(74,36,26,.1);display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px 20px');
     el.innerHTML =
       '<div style="background:#ffe1d0;color:#c6430f;border-radius:16px;min-width:74px;padding:.5rem .6rem;display:flex;flex-direction:column;align-items:center;line-height:1.05;flex-shrink:0">'
       + '<span style="font-family:\'Intro Rust\',sans-serif;font-weight:700;font-size:1.4rem">'+ev.dia+'</span>'
       + '<span style="font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em">'+ev.mes+'</span></div>'
-      + '<div style="flex:1 1 220px;min-width:200px">'
-      + '<h2 style="font-family:\'Intro Rust\',sans-serif;font-weight:700;text-transform:uppercase;font-size:1.1rem;line-height:1.12;margin:0 0 .2rem;color:#4c241a">'+ev.titulo+'</h2>'
-      + '<p style="margin:0;font-size:.9rem;color:#6b3626">'+ev.local+'</p></div>'
-      + '<span style="font-weight:700;font-size:.8rem;border-radius:999px;padding:.32rem .9rem;background:#fce185;color:#4c241a;flex-shrink:0">'+ev.bairro+'</span>';
+      + '<div style="flex:1 1 240px;min-width:200px">'
+      + '<h2 style="font-family:\'Intro Rust\',sans-serif;font-weight:700;text-transform:uppercase;font-size:1.1rem;line-height:1.12;margin:0 0 .25rem;color:#4c241a">'+ev.titulo+'</h2>'
+      + '<p style="margin:0 0 .2rem;font-size:.82rem;font-weight:700;color:#c6430f">'+meta+'</p>'
+      + (ev.local ? '<p style="margin:0;font-size:.9rem;color:#6b3626">📍 '+ev.local+'</p>' : '')
+      + (ev.descricao ? '<p style="margin:.45rem 0 0;font-size:.86rem;color:#6b3626;line-height:1.45">'+ev.descricao+'</p>' : '')
+      + '</div>'
+      + (ev.bairro ? '<span style="font-weight:700;font-size:.8rem;border-radius:999px;padding:.32rem .9rem;background:#fce185;color:#4c241a;flex-shrink:0">'+ev.bairro+'</span>' : '');
     lista.appendChild(el);
   });
 </script>
