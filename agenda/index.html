@@ -83,15 +83,16 @@
 
 <script>
   // Edite esta lista para atualizar a agenda.
-  var EVENTOS = [
-    { dia:"18", mes:"jul", titulo:"Roda de conversa: escola pública", local:"CIEP da Praça — 18h", bairro:"Tijuca" },
-    { dia:"22", mes:"jul", titulo:"Caminhada com a economia criativa", local:"Feira do Lavradio — 10h", bairro:"Centro" },
-    { dia:"26", mes:"jul", titulo:"Visita ao Planetário com professores", local:"Fundação Planetário — 14h", bairro:"Gávea" },
-    { dia:"01", mes:"ago", titulo:"Encontro da juventude", local:"Lona Cultural — 16h", bairro:"Madureira" },
-    { dia:"08", mes:"ago", titulo:"Balcão de direitos itinerante", local:"Praça do Skate — 9h", bairro:"São Gonçalo" },
-    { dia:"15", mes:"ago", titulo:"Plenária aberta da pré-campanha", local:"Clube local — 18h30", bairro:"Niterói" }
-  ];
+  var EVENTOS = []; // sem eventos marcados no momento (adicione objetos aqui para publicar)
   var lista = document.getElementById('agenda-lista');
+  if (EVENTOS.length === 0) {
+    var vazio = document.createElement('div');
+    vazio.setAttribute('style','background:#fffdf7;border:1px dashed #d8c08a;border-radius:22px;padding:1.8rem 1.4rem;text-align:center');
+    vazio.innerHTML =
+      '<p style="margin:0;font-family:\'Intro Rust\',sans-serif;font-weight:700;text-transform:uppercase;font-size:1.2rem;color:#4c241a">Nenhum evento marcado por enquanto</p>'
+      + '<p style="margin:.5rem auto 0;font-size:.95rem;color:#6b3626;max-width:44ch">Os próximos encontros da pré-campanha aparecem aqui. Entra na comunidade pra saber em primeira mão.</p>';
+    lista.appendChild(vazio);
+  }
   EVENTOS.forEach(function(ev){
     var el = document.createElement('article');
     el.setAttribute('style','background:#fffdf7;border:1px solid #e7d4a8;border-radius:22px;padding:1.1rem 1.3rem;box-shadow:0 6px 18px rgba(74,36,26,.1);display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px');
